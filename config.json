@@ -1,0 +1,6 @@
+{
+    "token": "MTIwNjE4Mjk2MjQ4NDIxNTgyOA.G484PV.usI53bqN0tH0oFN9UlMmRhUkujzW7h3C0cC2UU",
+    "clientId": "1206182962484215828",
+	"guildId": "1206182799380586537",
+    "mongo_url": "mongodb+srv://discord_bot:1hRehCdxzhGO2VQl@cluster0.gptxrgp.mongodb.net/?retryWrites=true&w=majority"
+}
