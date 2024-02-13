@@ -3,7 +3,7 @@ const { token } = require("./config.json");
 const fs = require('fs');
 const path = require('node:path');
 const colors = require('colors');
-const { newInterval } = require('./monitoring/index')
+const { newInterval, initMonitoring } = require('./monitoring/index')
 const db = require('./db/index')
 
 colors.enable();
@@ -36,6 +36,7 @@ client.once(Events.ClientReady, readyClient => {
 	readyClient.guilds.cache.forEach(guild => {
 		console.log(`[BOT] - [SUCCESS] Loaded guild ${guild.name}`.yellow);
 	});
+	initMonitoring()
 })
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -74,7 +75,7 @@ db.connectToServer(async (err) => {
 
       const documents = await collection.find().toArray();
       documents.forEach(document => {
-		newInterval(document.pollid, document.api_url, document.channelid, document.interval);
+		newInterval(document.pollid, document.api_url, document.channelid, document.interval, document.webhookid, document.webhooktoken, document.pollid);
         console.log(`[DB] - [SUCCESS] Loaded interval ${document.pollid}`.yellow);
       });
     }
@@ -86,3 +87,5 @@ db.connectToServer(async (err) => {
 });
 
 client.login(token);
+
+module.exports = { client }

@@ -1,11 +1,11 @@
 const dbModule = require('../index');
 
 module.exports = {
-    newPoll: async function (userid, name, url, api_url, interval, channelid, pollid) {
+    newPoll: async function (userid, name, url, api_url, interval, channelid, pollid, webhookid, webhooktoken) {
         const collection = await dbModule.getDb().db('polling').collection(userid)
         const poll = await collection.findOne({ name: name });
         if (poll === null) {
-            await collection.insertOne({ name: name, url: url, api_url:api_url, interval: interval, channelid: channelid, pollid: pollid});
+            await collection.insertOne({ name: name, url: url, api_url:api_url, interval: interval, channelid: channelid, pollid: pollid, webhookid: webhookid, webhooktoken:webhooktoken});
             return true;
         }
         return false

@@ -9,5 +9,14 @@ module.exports = {
         const collection = dbModule.getDb().db("cache").collection(pollid);
         const result = await collection.findOne({ productid: productid });
         return result !== null;
+    },
+    clearCache: async function (pollid) {
+        const collection = dbModule.getDb().db("cache").collection(pollid);
+        const result = await collection.drop();
+    },
+    isEmpty: async function (pollid) {
+        const collection = dbModule.getDb().db("cache").collection(pollid);
+        const result = await collection.countDocuments() === 0;
+        return result;
     }
 }

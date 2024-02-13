@@ -3,6 +3,7 @@ const access_db = require('../../db/admin/admin_access')
 const polling_db = require('../../db/polling/polling')
 const { newInterval } = require('../../monitoring/index');
 const url = require('url');
+const { webhook_pp } = require('../../config.json')
 
 function transformVintedUrl(catalogUrl) {
     const api_url = "https://www.vinted.fr/api/v2/catalog/items";
@@ -12,19 +13,21 @@ function transformVintedUrl(catalogUrl) {
     const queryParameters = {
         page: 1,
         per_page: 50,
-        search_text: query.search_text || '',
-        catalog_ids: query["catalog[]"] ? query["catalog[]"].toString() : '',
-        currency: query.currency || '',
-        order: query.order || '',
-        status_ids: query["status_ids[]"].toString() || '',
-        size_ids: query["size_ids[]"] ? query["size_ids[]"].toString() : '',
-        brand_ids: query["brand_ids[]"] ? query["brand_ids[]"].toString() : '',
-        color_ids: query["color_ids[]"] ? query["color_ids[]"].toString() : '',
-        material_ids: query["material_ids[]"] ? query["material_ids[]"].toString() : '',
-        price_from: query.price_from || '',
-        price_to: query.price_to || '',
+        search_text: query.search_text || null,
+        catalog_ids: query["catalog[]"] ? query["catalog[]"].toString() : null,
+        currency: query.currency || null,
+        order: query.order || null,
+        status_ids: query["status_ids[]"] ? query["status_ids[]"].toString() : null,
+        size_ids: query["size_ids[]"] ? query["size_ids[]"].toString() : null,
+        brand_ids: query["brand_ids[]"] ? query["brand_ids[]"].toString() : null,
+        color_ids: query["color_ids[]"] ? query["color_ids[]"].toString() : null,
+        material_ids: query["material_ids[]"] ? query["material_ids[]"].toString() : null,
+        price_from: query.price_from || null,
+        price_to: query.price_to || null,
     }
-    const apiUrl = `${api_url}?${new URLSearchParams(queryParameters).toString()}`;
+    //add the query parameters to the api url except the null ones
+    const apiUrl = `${api_url}?${Object.keys(queryParameters).filter(key => queryParameters[key] !== null).map(key => `${key}=${queryParameters[key]}`).join('&')}`;
+    console.log(apiUrl);
     return apiUrl;
 }
 
@@ -66,9 +69,18 @@ module.exports = {
         const answer = await interaction.reply({ content: `Starting polling for ${name}...`})
         let api_url = transformVintedUrl(url);
         const id = generateId();
-        const result = await polling_db.newPoll(userid, name, url, api_url, interval, interaction.channel.id, id).then(result => {
+        let wh = {id: "", token: ""}
+        const webhook = await interaction.channel.createWebhook({
+            name: name,
+            avatar: webhook_pp,
+        }).then((webhook) => {
+            wh.id = webhook.id
+            wh.token = webhook.token
+        })
+        .catch(console.error);
+        const result = await polling_db.newPoll(userid, name, url, api_url, interval, interaction.channel.id, id, wh.id, wh.token).then(result => {
             if (result) {
-                newInterval(id, api_url, interaction.channel.id, interval);
+                newInterval(id, api_url, interaction.channel.id, interval, wh.id, wh.token, id);
                 return interaction.editReply({ content: `Started polling for ${name}`})
             } else {
                 return interaction.editReply({ content: `Error starting polling for ${name}`})

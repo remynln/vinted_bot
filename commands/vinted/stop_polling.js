@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, WebhookClient } = require('discord.js');
 const access_db = require('../../db/admin/admin_access')
 const polling_db = require('../../db/polling/polling')
 const { removeInterval } = require('../../monitoring/index')
@@ -25,6 +25,8 @@ module.exports = {
             if (result.length > 0) {
                 const poll = result.find(poll => poll.name === name);
                 if (poll) {
+                    const wh = new WebhookClient({id: poll.webhookid, token: poll.webhooktoken})
+                    wh.delete("Stopping poll");
                     return poll.pollid;
                 } else {
                     return null;
