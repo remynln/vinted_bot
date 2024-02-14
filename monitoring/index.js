@@ -1,5 +1,5 @@
 const { ActionRowBuilder, WebhookClient, EmbedBuilder, ButtonBuilder } = require('discord.js')
-const cloudscraper = require('cloudscraper').defaults({proxy: "20.111.54.16:8123"})
+const cloudscraper = require('cloudscraper')
 const axios = require('axios');
 const cachedb = require('../db/cache/index')
 
